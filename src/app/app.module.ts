@@ -19,13 +19,15 @@ import { environment } from '../environments/environment';
 import {RouterStateSerializer, StoreRouterConnectingModule} from "@ngrx/router-store";
 
 import { EffectsModule } from '@ngrx/effects';
+import { reducers, metaReducers } from './reducers';
+import { CoursesGuardService } from './courses/courses.guard.service';
 
 
 const routes: Routes = [
     {
         path: 'courses',
         loadChildren: () => import('./courses/courses.module').then(m => m.CoursesModule),
-        canActivate: [],
+        canActivate: [CoursesGuardService],
     },
     {
         path: "**",
@@ -48,7 +50,9 @@ const routes: Routes = [
         MatSidenavModule,
         MatListModule,
         MatToolbarModule,
-        AuthModule.forRoot()
+        AuthModule.forRoot(),
+        StoreModule.forRoot(reducers, { metaReducers }),
+        !environment.production ? StoreDevtoolsModule.instrument() : []
     ],
     providers: [],
     bootstrap: [AppComponent]
