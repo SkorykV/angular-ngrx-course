@@ -5,6 +5,8 @@ import {filter, map, tap, withLatestFrom} from "rxjs/operators";
 import {CoursesService} from "../services/courses.service";
 import {AppState} from '../../reducers';
 import {select, Store} from '@ngrx/store';
+import { AllCoursesRequested } from '../course.actions';
+import { selectAllCourses, selectBeginnerCourses, selectAdvancedCourses, selectPromoTotal } from '../course.selectors';
 @Component({
     selector: 'home',
     templateUrl: './home.component.html',
@@ -18,25 +20,18 @@ export class HomeComponent implements OnInit {
 
     advancedCourses$: Observable<Course[]>;
 
-    constructor(private coursesService: CoursesService, private store: Store<AppState>) {
+    constructor(private store: Store<AppState>) {
 
     }
 
     ngOnInit() {
+        this.store.dispatch(new AllCoursesRequested());
 
-        const courses$ = this.coursesService.findAllCourses();
+        this.beginnerCourses$ = this.store.pipe(select(selectBeginnerCourses));
 
-        this.beginnerCourses$ = courses$.pipe(
-          map(courses => courses.filter(course => course.category === 'BEGINNER') )
-        );
+        this.advancedCourses$ = this.store.pipe(select(selectAdvancedCourses));
 
-        this.advancedCourses$ = courses$.pipe(
-            map(courses => courses.filter(course => course.category === 'ADVANCED') )
-        );
-
-        this.promoTotal$ = courses$.pipe(
-            map(courses => courses.filter(course => course.promo).length)
-        );
+        this.promoTotal$ = this.store.pipe(select(selectPromoTotal));
 
     }
 

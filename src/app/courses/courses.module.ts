@@ -25,6 +25,8 @@ import {MatIconModule} from "@angular/material/icon";
 import {RouterModule, Routes} from "@angular/router";
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { CourseEffects } from './courses.effects';
+import { courseReducer } from './course.reducer';
 
 
 export const coursesRoutes: Routes = [
@@ -62,7 +64,9 @@ export const coursesRoutes: Routes = [
         MatDatepickerModule,
         MatMomentDateModule,
         ReactiveFormsModule,
-        RouterModule.forChild(coursesRoutes)
+        RouterModule.forChild(coursesRoutes),
+        EffectsModule.forFeature([CourseEffects]),
+        StoreModule.forFeature('courses', courseReducer),
     ],
     declarations: [HomeComponent, CoursesCardListComponent, CourseDialogComponent, CourseComponent],
     exports: [HomeComponent, CoursesCardListComponent, CourseDialogComponent, CourseComponent],
