@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {AllCoursesLoaded, AllCoursesRequested, CourseActionTypes, CourseLoaded, CourseRequested} from './course.actions';
-import {throwError} from 'rxjs';
+import {AllCoursesLoaded, AllCoursesRequested, CourseActionTypes, CourseLoaded, CourseRequested, LessonsPageRequested, LessonsPageLoaded, LessonsPageCancelled} from './course.actions';
+import {throwError, of} from 'rxjs';
 import {catchError, concatMap, exhaustMap, filter, map, mergeMap, withLatestFrom} from "rxjs/operators";
 import {CoursesService} from './services/courses.service';
 import {AppState} from '../reducers';
@@ -37,6 +37,30 @@ export class CourseEffects {
         return throwError(err);
       })
     );
+
+  @Effect()
+  loadLessons$ = this.actions$
+      .pipe(
+        ofType<LessonsPageRequested>(CourseActionTypes.LessonsPageRequested),
+        mergeMap(
+          action => {
+            const courseId = action.payload.courseId;
+            const pageNumber = action.payload.page.pageIndex;
+            const pageSize = action.payload.page.pageSize;
+
+            return this.coursesService
+              .findLessons(courseId, pageNumber, pageSize)
+              .pipe(
+                catchError(err => {
+                  this.store.dispatch(new LessonsPageCancelled())
+                  return of([])
+                })
+              );
+          }
+        ),
+        map(lessons => new LessonsPageLoaded({lessons})),
+        
+      )
 
 
   constructor(private actions$ :Actions, private coursesService: CoursesService,
